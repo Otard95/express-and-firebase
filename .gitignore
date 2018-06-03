@@ -67,9 +67,9 @@ typings/
 .serverless
 
 # tokens
-# keys-tokens
+keys-tokens
 dist
-keys-tokens/expresstest*.json
+
 
 # vscode
 .vscode
