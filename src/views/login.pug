@@ -1,0 +1,17 @@
+extends layouts/default.pug
+
+block content
+	h2 Login
+	form(action="/user/login/auth", method="post")
+		input#(type="email", name="username")
+		input#(type="password", name="password")
+		input(type="submit");
+
+	h2 Or use a third party
+		#third-pary-login-container.container.floating
+			button#google.login-with
+				| Login with Google
+			button#facebook.login-with
+				| Login with Facebook
+			button#twitter.login-with
+				| Login with Twitter

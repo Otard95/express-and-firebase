@@ -1,0 +1,7 @@
+{
+	"firebase": {
+		"admin" : {
+			<firebase service account>
+		}
+	}
+}
