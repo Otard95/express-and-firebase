@@ -1,7 +1,9 @@
-const { exec } = require('child_process');
-const gulp = require('gulp');
-const nodemon = require('gulp-nodemon');
-const ts = require('gulp-typescript');
+const { exec }    = require('child_process');
+const gulp        = require('gulp');
+const nodemon     = require('gulp-nodemon');
+const ts          = require('gulp-typescript');
+const browsersync = require('browser-sync').create();
+const sass        = require('gulp-sass');
 
 let ts_proj = ts.createProject('tsconfig.json');
 
@@ -29,20 +31,23 @@ const compile_bin = () => {
 
 const compile_views = () => {
 	return gulp.src(paths.views.src)
-		.pipe(gulp.dest(paths.views.dest));
+		.pipe(gulp.dest(paths.views.dest))
+		.on('end', browsersync.reload);
 }
 
 const compile_public = () => {
 	return gulp.src(paths.public.src)
-		.pipe(gulp.dest(paths.public.dest));
+		.pipe(sass().on('error', sass.logError))
+		.pipe(gulp.dest(paths.public.dest))
+		.on('end', browsersync.reload);
 }
 
 const run_server = done => {
 
-	const nodemon_prc = exec('nodemon -w ./dist');
+	const nodemon_prc = exec(`nodemon -w ${paths.server.cwd}`);
 	
 	nodemon_prc.stdout.on('data', (data) => {
-		console.log(data);
+		process.stdout.write(data);
 	});
 
 	nodemon_prc.stderr.on('data', (data) => {
@@ -59,18 +64,23 @@ const run_server = done => {
 
 	process.on('SIGTERM', () => {
 		nodemon_prc.kill();
-		setTimeout(()=>{
-			process.exit(0);
-		}, 5000);
 	})
 	.on('SIGINT', () => {
 		nodemon_prc.kill();
-		setTimeout(() => {
-			process.exit(0);
-		}, 5000);
 	});
 
 	done();
+};
+
+const start_browsersync = done => {
+
+	browsersync.init({
+		proxy: "localhost:3000",
+		port: 3001
+	});
+
+	done()
+
 };
 
 const watch = done => {
@@ -86,7 +96,7 @@ const watch = done => {
 
 const compile = gulp.parallel(compile_ts, compile_bin, compile_views, compile_public);
 
-const serve = gulp.series(compile, run_server);
+const serve = gulp.series(compile, run_server, start_browsersync);
 
 const default_task = gulp.series(watch, serve);
 
