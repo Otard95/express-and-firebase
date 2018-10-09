@@ -1,11 +1,11 @@
-const { exec }    = require('child_process');
 const gulp        = require('gulp');
-const nodemon     = require('gulp-nodemon');
 const ts          = require('gulp-typescript');
 const browsersync = require('browser-sync').create();
 const sass        = require('gulp-sass');
+const filter      = require('gulp-filter');
 
-let ts_proj = ts.createProject('tsconfig.json');
+const ts_proj     = ts.createProject('tsconfig.json');
+const sass_filter = filter('**/*.sass', { restore: true });
 
 const paths = {
 	bin: { src: "./src/bin/**/*", dest: "./dist/bin" },
@@ -37,40 +37,12 @@ const compile_views = () => {
 
 const compile_public = () => {
 	return gulp.src(paths.public.src)
+		.pipe(sass_filter)
 		.pipe(sass().on('error', sass.logError))
+		.pipe(sass_filter.restore)
 		.pipe(gulp.dest(paths.public.dest))
 		.on('end', browsersync.reload);
 }
-
-const run_server = done => {
-
-	const nodemon_prc = exec(`nodemon -w ${paths.server.cwd}`);
-	
-	nodemon_prc.stdout.on('data', (data) => {
-		process.stdout.write(data);
-	});
-
-	nodemon_prc.stderr.on('data', (data) => {
-		console.log(`child stderr: ${data}`);
-	});
-
-	nodemon_prc.on('close', (code) => {
-		console.log(`child process exited with code ${code}`);
-		process.exit(0);
-	})
-	.on('error', (err) => {
-		console.log(`Child ERROR: ${err}`);
-	});
-
-	process.on('SIGTERM', () => {
-		nodemon_prc.kill();
-	})
-	.on('SIGINT', () => {
-		nodemon_prc.kill();
-	});
-
-	done();
-};
 
 const start_browsersync = done => {
 
@@ -96,7 +68,7 @@ const watch = done => {
 
 const compile = gulp.parallel(compile_ts, compile_bin, compile_views, compile_public);
 
-const serve = gulp.series(compile, run_server, start_browsersync);
+const serve = gulp.series(compile, start_browsersync);
 
 const default_task = gulp.series(watch, serve);
 

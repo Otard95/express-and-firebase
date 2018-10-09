@@ -33,9 +33,9 @@
     "serve-favicon": "^2.5.0"
   },
   "devDependencies": {
-    "browser-sync": "^2.24.4",
+    "browser-sync": "^2.26.0",
     "gulp": "^4.0.0",
-    "gulp-nodemon": "^2.2.1",
+    "gulp-filter": "^5.1.0",
     "gulp-sass": "^4.0.1",
     "gulp-typescript": "^4.0.2",
     "typescript": "^2.8.3"
